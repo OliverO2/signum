@@ -21,15 +21,23 @@ private val Pair<String, *>.oid: String? get() = this.first
 
 kotlin {
     androidLibrary {
-        //    testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        /*
-        withHostTestBuilder {}.configure {}
-       withDeviceTestBuilder {
-           it.sourceSetTreeName = "test"
-       }
-        */
-        withHostTest { }
         namespace = "at.asitplus.signum.indispensable"
+
+        withDeviceTestBuilder {
+            sourceSetTreeName = "test"
+        }.configure {
+            instrumentationRunnerArguments["timeout_msec"] = "2400000"
+            managedDevices {
+                localDevices {
+                    create("pixel2api36").apply {
+                        device = "Pixel 2"
+                        apiLevel = 36
+                        systemImageSource = "google_apis_playstore"
+                    }
+                }
+            }
+        }
+
         packaging {
             listOf(
                 "org/bouncycastle/pqc/crypto/picnic/lowmcL5.bin.properties",
@@ -71,9 +79,10 @@ kotlin {
     androidNativeArm32()
     androidNativeArm64()
     listOf(
-        js(IR).apply { browser { testTask { enabled = false } } },
+        js().apply { browser { testTask { enabled = false } } },
         @OptIn(ExperimentalWasmDsl::class)
-        wasmJs().apply { browser { testTask { enabled = false } } }
+        wasmJs().apply { browser { testTask { enabled = false } } },
+      //  wasmWasi()
     ).forEach {
         it.nodejs()
     }
@@ -103,25 +112,21 @@ kotlin {
                 implementation(kotest("property"))
             }
         }
-        getByName("androidHostTest").dependencies {
-            if (project.findProperty("local.androidHostTestDance") != "removeDependency") implementation("de.infix.testBalloon:testBalloon-framework-core:${AspVersions.testballoon}")
-            // implementation(libs.core)
-            // implementation(libs.rules)
-        }
         androidJvmMain {
             dependencies {
                 api(bouncycastle("bcpkix"))
                 api(coroutines("jvm"))
             }
         }
-/*
-        androidInstrumentedTest.dependencies {
-            implementation(libs.runner)
-            implementation(libs.core)
-            implementation(libs.rules)
-        }*/
 
+        getByName("androidDeviceTest").dependencies {
+            implementation(libs.runner)
+            implementation("de.infix.testBalloon:testBalloon-framework-core:${AspVersions.testballoon}")
+        }
     }
+}
+tasks.withType<Test>().configureEach {
+    maxHeapSize = "4G"
 }
 
 exportXCFramework(

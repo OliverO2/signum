@@ -3,7 +3,22 @@
 ## 3.0
 
 ### NEXT
+* Add stricter length checks to be more resilient towards adversarial inputs
+* Correct serialization logic for symmetric `CoseKey` in `CoseKeySerializer`
+* `Asn1String` revamp
+    * Deprecated `Asn1Primitive.asAsn1String()`, moved decoding logic into `Asn1String.doDecode()`
+    * Added specific decodeTo functions in `Asn1Primitive` for every string type that follow usual pattern for decoding primitive, when dealing with implicit tags caller should call function for decoding specific string type. If we do something like 'Asn1String.decodeFromTlv()` we expect explicit tag.
+    * Added `Asn1String.rawValue` property for storing raw ByteArray of the string, used in checks for several charsets and good for reencoding Asn1String, it will be encoded as it was before decoding
+* Add COSE_Mac0 support with `CoseMac` class
+* Introduce `ProtectedCoseHeaderSerializer` for serialization/deserialization protected header
+* Replace raw-byte protected header and its ByteArray extension serialization with `CoseHeader` using the new serializer
+* Allow overriding randomness source for symmetric key generation
+* Extend properties in `JweHeader`
+* Fix RSA signing on Android
+* Kotlin 2.2.20
 * TestBalloon-powered tests
+* New KMP-AGP Plugin
+* Raise Android minSDK to 26 (Android 8.0 Oreo)
 
 ### 3.17.0 (Supreme 0.9.0)
 * **KDF Support**
